@@ -1,7 +1,7 @@
-import { upload } from "../middlewares/multer.middleware";
 import { userModel } from "../models/user.model.js";
 import uploadOnCloudinary from "../utils/cloudinary.utility.js";
 import ApiResponse from "../utils/apiResponse.utility.js";
+import { networkInterfaces } from "os";
 
 
 export const registerUser =  async(req, res, next)=> {
@@ -45,13 +45,16 @@ export const registerUser =  async(req, res, next)=> {
                 throw new Error("This email/username already exists. Please you a different one");
             }
 
-            const imageLocalPath = req.files?.image[0]?.path;
+            const imageLocalPath = req.files?.avatar[0]?.path;
+            console.log("local image path", imageLocalPath);
             //local path of image provided by multer
             if(!imageLocalPath){
                 throw new Error("local image path is not avaialble", imageLocalPath);
             }
             //upload to cloudinary:
             const imagePathFromCloudinary = await uploadOnCloudinary(imageLocalPath);
+
+            console.log("image path from cloudinary", imagePathFromCloudinary);
 
             if(!imagePathFromCloudinary){
                 throw new Error("image path from cloudinary not available", imagePathFromCloudinary);
@@ -62,7 +65,7 @@ export const registerUser =  async(req, res, next)=> {
                 email,
                 password,
                 fullname,
-                images: imagePathFromCloudinary,
+                images: imagePathFromCloudinary.url,
             })
             //_id,
             //username, email, fullname,image, password, accessToken, refreshToken
@@ -71,11 +74,11 @@ export const registerUser =  async(req, res, next)=> {
                 throw new Error("user not created in db", createdUser);
             }
             //_id
-            const user = userModel.findById(createdUser._id).select("-password -accessToken -refreshToken");
+            const user = await userModel.findById(createdUser._id).select("-accessToken -refreshToken");
 
             //we will return them as a response.
             return res.status(201).json(
-                ApiResponse(
+                new ApiResponse(
                     200,
                     "user successfully registered",
                     user,

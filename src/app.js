@@ -1,4 +1,5 @@
 import express from 'express';
+import cors from 'cors';
 
 const app = express();
 
@@ -20,7 +21,11 @@ app.use(express.urlencoded({
 app.use(express.static("public"));
 //to accept static files.
 
+//importing routes
+import router from './routes/user.route.js';
 
+//http://localhost:3000/v1/user/register - for register route.
+app.use('/v1/user', router);
 
 export default app;
 

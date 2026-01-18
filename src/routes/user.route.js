@@ -7,9 +7,14 @@ const router = Router();
 
 //(route path, middleware, controller);
 //register route.
-router.route('/register',  //path -which is shown in the url
+router.route('/register').post(  //path -which is shown in the url
 
-    upload.single('avatar'), //middleware action- multer
+    upload.fields([
+        { 
+            name: 'avatar', maxCount: 1 
+
+        }
+    ]), //middleware action- multer
 
     registerUser,
 
